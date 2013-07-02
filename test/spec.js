@@ -22,98 +22,105 @@ describe('GameService', function() {
 		gameService = new GameService();
 	});
 
-	it('can be instantiated', function() {
+	it("can be instantiated", function() {
 		expect(gameService).toBeDefined();
 	});
 
-	it('can instantiate players', function() {
+	it("can create players", function() {
 		expect(gameService.createPlayer()).toBeDefined();
 	});
 
-	it('can instantiate players and add them to the TTT', function() {
-		expect(gameService.createAndAddPlayer()).toBeDefined();
+	it("has no players in TTT before any have been added", function() {
+		var players = gameService.getPlayers();
+		expect(players).toEqual([]);
 	});
 
-	it('can get the players from the TTT when there are no players', function() {
-		expect(gameService.getPlayers()).toEqual([]);
+	it("doesn't have a first player until a player is added", function() {
+		expect(gameService.getFirstPlayer()).not.toBeDefined();
 	});
 
-	it('can get the players from the TTT when there is 1 player', function() {
+	it("can create 1 player and add it to the TTT", function() {
 		var player = gameService.createAndAddPlayer();
-		expect(gameService.getPlayers()).toEqual([player]);
+		var players = gameService.getPlayers();
+		expect(players.indexOf(player)).not.toBe(-1);
 	});
 
-	it('can get the players from the TTT when there are 2 players', function() {
-		var player1 = gameService.createAndAddPlayer();
-		var player2 = gameService.createAndAddPlayer();
-		expect(gameService.getPlayers()).toEqual([player1, player2]);
+	it("has a first player after a player is added", function() {
+		gameService.createAndAddPlayer();
+		expect(gameService.getFirstPlayer()).toBeDefined();
 	});
 
-	it('can get the players from the TTT when there are 2 players', function() {
-		var player1 = gameService.createAndAddPlayer();
-		var player2 = gameService.createAndAddPlayer();
-		expect(gameService.getPlayers()).toEqual([player1, player2]);
+	it("can create 2 players and add them to the TTT", function() {
+		gameService.setUpGame();
+		expect(gameService.getPlayers().length).toEqual(2);
 	});
 
-	it('doesn\'t have an active player before any players are added', function() {
+	it("doesn't have an active player before the game starts", function() {
+		gameService.setUpGame();
 		expect(gameService.getActivePlayer()).not.toBeDefined();
 	});
 
-	it('has an active player who is one of the players', function() {
+	it("only starts a game when there are 2 players and a board", function() {
 		gameService.createAndAddPlayer();
-		var activePlayer = gameService.getActivePlayer();
-		var players = gameService.getPlayers();
-		expect(players.indexOf(activePlayer)).not.toEqual(-1);
+		expect(gameService.startGame()).toBe(false);
+		gameService.createAndAddPlayer();
+		expect(gameService.startGame()).toBe(false);
+		gameService.createAndSetBoard();
+		expect(gameService.startGame()).toBe(true);
 	});
 
-	it('won\'t start the game with only one player', function() {
-		gameService.createAndAddPlayer();
-		var started = gameService.startGame();
-		expect(started).toBe(false);
-	});
-
-	it('prompts the active player to make a move when the game starts', function() {
-		gameService.createAndAddPlayer();
-		gameService.createAndAddPlayer();
-		var activePlayer = gameService.getActivePlayer();
-		spyOn(activePlayer, 'promptForMove');
-		gameService.startGame();
-		expect(activePlayer.promptForMove).toHaveBeenCalled();
-	});
-
-	it('expects both players to have a unique mark', function() {
+	it("expects both players to have a unique mark", function() {
 		var player1 = gameService.createAndAddPlayer();
 		var player2 = gameService.createAndAddPlayer();
+
+		expect(player1.getMark()).toBeDefined();
+		expect(player2.getMark()).toBeDefined();
 		expect(player1.getMark()).not.toEqual(player2.getMark());
 	});
 
-	it('expects the a player to be able to make a move', function() {
-		var player = gameService.createAndAddPlayer();
-		gameService.createAndSetBoard();
-		var playerMark = player.getMark();
-		player.makeMove({x: 0, y: 0});
-		expect(gameService.markAt(0, 0)).toEqual(playerMark);
+	it("prompts the first player for a move when the game starts", function() {
+		gameService.setUpGame();
+		var firstPlayer = gameService.getFirstPlayer();
+		spyOn(firstPlayer, "promptForMove");
+		gameService.startGame();
+		expect(firstPlayer.promptForMove).toHaveBeenCalled();
 	});
 
-	it('expects a computer player to pick and make a move on the board when prompted', function() {
-		var playerHuman = gameService.createAndAddPlayer('human');
-		var playerComputer = gameService.createAndAddPlayer('computer');
-		var mark = gameService.getActivePlayer().getMark();
-		gameService.createAndSetBoard();
+	it("expects a computer player to pick and make a move on the board when prompted", function() {
+		gameService.setUpGame();
+		var playerComputer = gameService.getActivePlayer();
 
 		expect(gameService.numberOfMarksOnBoardBy(playerComputer)).toEqual(0);
 		gameService.startGame();
-		expect(gameService.numberOfMarksOnBoardBy(playerComputer)).toEqual(1);
+		expect(gameService.numberOfMarksOnBoardBy(playerComputer)).toBeGreaterThan(0);
 	});
 
-	it('expects a human player to contact UI and make a move on the board when prompted', function() {
+	it("expects a human player to contact UI and make a move on the board when prompted", function() {
 		var playerComputer = gameService.createAndAddPlayer('computer');
 		var playerHuman = gameService.createAndAddPlayer('human');
-		var mark = gameService.getActivePlayer().getMark();
 		gameService.createAndSetBoard();
 
 		expect(gameService.numberOfMarksOnBoardBy(playerHuman)).toEqual(0);
 		gameService.startGame();
-		expect(gameService.numberOfMarksOnBoardBy(playerHuman)).toEqual(1);
+		expect(gameService.numberOfMarksOnBoardBy(playerHuman)).toBeGreaterThan(0);
+	});
+
+	it("expects a player to pick the first available move when it's 0,0", function() {
+		gameService.setUpGame();
+		var mark = gameService.getActivePlayer().getMark();
+		gameService.startGame();
+		expect(gameService.markAt(0, 0)).toEqual(mark);
+	});
+
+	it("changes the activeplayer and prompts them for a move when a move is made, to game completion", function() {
+		gameService.setUpGame();
+		gameService.startGame();
+		expect(gameService.isGameOver()).toBe(true);
+	});
+
+	it("changes the status of the game to 'draw' when neither player has won", function() {
+		gameService.setUpGame();
+		gameService.startGame();
+		expect(gameService.getStatus()).toBe("draw");
 	});
 });
