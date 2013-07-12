@@ -1,4 +1,5 @@
 var Board = function(tiles) {
+	//this.watchers = [];
 	this.tiles = tiles ? tiles :
 	[
 		['', '', ''],
@@ -14,8 +15,18 @@ var Board = function(tiles) {
 		this.tiles[y][x] = mark;
 	};
 
+	/*this.addWatcher = function(watcher) {
+		this.watchers.push(watcher);
+	};
+
+	this.notifyWatchers = function() {
+		for (var i = 0; i < this.watchers.length; i++) {
+			this.watchers[i].updateBoard(this.tiles);
+		}
+	};*/
+
 	this.getTiles = function() {
-		var tiles = [];
+		/*var tiles = [];
 		for (var y = 0; y < this.tiles.length; y++) {
 			tiles[y] = [];
 			for (var x = 0; x < this.tiles[y].length; x++) {
@@ -23,7 +34,8 @@ var Board = function(tiles) {
 				tiles[y][x] = {mark: mark};
 			}
 		}
-		return tiles;
+		return tiles;*/
+		return this.tiles;
 	};
 
 	this.copyBoard = function() {

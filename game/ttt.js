@@ -6,6 +6,7 @@ var TTT = function() {
 	this.winningPlayer = undefined;
 	this.availableMarks = ["X", "O"];
 	this.playerMarks = ["X", "O"];
+	this.status = "";
 	this.winningPatterns = [
 		[{x: 0, y: 2}, {x: 0, y: 1}, {x: 0, y: 0}], // Left.
 		[{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}], // Top.
@@ -16,6 +17,15 @@ var TTT = function() {
 		[{x: 0, y: 0}, {x: 1, y: 1}, {x: 2, y: 2}], // Top-left to bottom-right.
 		[{x: 0, y: 2}, {x: 1, y: 1}, {x: 2, y: 0}]  // Bottom-left to top-right.
 	];
+
+	/* statuses
+
+	The game has ended in a draw.
+	It's player X's turn.
+	It's player O's turn.
+	Player 'O' has won!
+	Player 'X' has won!
+	*/
 
 	this.copyGame = function() {
 		var game = new TTT();
@@ -36,8 +46,18 @@ var TTT = function() {
 		this.playerThatGoesFirst = players[1];
 	};
 
+	this.setPlayer = function(index, player) {
+		this.players[index - 1] = player;
+		this.playerThatGoesFirst = player;
+		this.activePlayer = player;
+	};
+
 	this.getPlayers = function() {
 		return this.players;
+	};
+
+	this.getMarkOfPlayer = function(index) {
+		return this.playerMarks[index - 1];
 	};
 
 	this.getFirstPlayer = function() {
@@ -56,52 +76,41 @@ var TTT = function() {
 		return this.board;
 	};
 
+	this.isReady = function() {
+		return (this.players.length === 2 && this.board !== undefined);
+	};
+
 	this.startGame = function() {
-		if (this.players.length == 2 && this.board) {
-			this.activePlayer = this.playerThatGoesFirst;
+		this.activePlayer = this.playerThatGoesFirst;
+		this.promptActivePlayerForMove();
+	};
+
+	this.makeMoveForActivePlayer = function(moveCoords) {
+		this.board.setMarkAt(this.activePlayer.getMark(), moveCoords.x, moveCoords.y);
+
+		if (!this.isGameOver()) {
+			this.switchActivePlayer();
 			this.promptActivePlayerForMove();
-			return true;
-		} else {
-			return false;
 		}
 	};
 
-	this.makeMove = function(move) {
-		this.board.setMarkAt(this.activePlayer.getMark(), move.x, move.y);
-		//this.winningPlayer = this.findWinningPlayer();
+	this.isGameOver = function() {
+		if (this.boardHasWinningPlayer() || this.boardIsFull())
+			return true;
+		else
+			return false;
+	};
 
-		if (!this.isGameOver()) {
-			//this.switchActivePlayer();
-			this.activePlayer = this.activePlayer == this.players[0] ? this.players[1] : this.players[0];
-			this.promptActivePlayerForMove();
-		}
+	this.switchActivePlayer = function() {
+		this.activePlayer = this.activePlayer == this.players[0] ? this.players[1] : this.players[0];
 	};
 
 	this.promptActivePlayerForMove = function() {
 		this.activePlayer.promptForMove();
 	};
 
-	this.getNextMark = function() {
-		return this.availableMarks.splice(0, 1)[0];
-	};
-
 	this.markAt = function(x, y) {
 		return this.board.markAt(x, y);
-	};
-
-	this.numberOfMarksOnBoardBy = function(player) {
-		var numberOfMarks = 0;
-		var playerMark = player.getMark();
-
-		for (var y = 0; y < 3; y++) {
-			for (var x = 0; x < 3; x++) {
-				if (this.board.markAt(x, y) == playerMark) {
-					numberOfMarks++;
-				}
-			}
-		}
-
-		return numberOfMarks;
 	};
 
 	this.makeOneMove = function(move) {
@@ -110,7 +119,7 @@ var TTT = function() {
 				this.activePlayer = this.playerThatGoesFirst;
 			}
 			if (!move) {
-				var move = this.activePlayer.AI.getBestMove(this, 1);
+				var move = this.activePlayer.moveProvider.getBestMove(this, 1);
 			}
 			
 			this.board.setMarkAt(this.activePlayer.getMark(), move.x, move.y);
@@ -118,29 +127,8 @@ var TTT = function() {
 		}
 	};
 
-	this.switchActivePlayer = function() {
-		this.activePlayer = this.activePlayer == this.players[0] ? this.players[1] : this.players[0];
-	}
-
-	this.getFirstAvailableMove = function() {
-		for (var y = 0; y < 3; y++) {
-			for (var x = 0; x < 3; x++) {
-				if (this.board.markAt(x, y) == '') {
-					return {x: x, y: y};
-				}
-			}
-		}
-	};
-
 	this.getAvailableMoves = function() {
 		return this.board.getAvailableMoves();
-	};
-
-	this.isGameOver = function() {
-		if (this.boardHasWinningPlayer() || this.boardIsFull())
-			return true;
-		else
-			return false;
 	};
 
 	this.boardIsFull = function() {
@@ -194,10 +182,5 @@ var TTT = function() {
 		} else {
 			return 0;
 		}
-	};
-
-	this.setPlayer = function(index, player) {
-		this.players[index-1] = player;
-		this.playerThatGoesFirst = player;
 	};
 };

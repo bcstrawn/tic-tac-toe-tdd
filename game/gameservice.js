@@ -7,10 +7,11 @@ var GameService = function() {
 		this.createAndSetBoard();
 	};
 
-	this.createAndAddPlayer = function(playerType) {
-		var mark = this.TTT.getNextMark();
+	this.setPlayer = function(index, playerType) {
+		var mark = this.TTT.getMarkOfPlayer(index);
 		var player = this.createPlayer(playerType, mark);
-		this.TTT.addPlayer(player);
+
+		this.TTT.setPlayer(index, player);
 		return player;
 	};
 
@@ -18,9 +19,9 @@ var GameService = function() {
 		var player = new Player(playerType, mark, this.TTT);
 
 		if (playerType == "human") {
-			player.setUI(new UI(this.TTT));
+			player.setMoveProvider(new UI(this.TTT));
 		} else if (playerType == "computer") {
-			player.setAI(new AI(this.TTT, player));
+			player.setMoveProvider(new AI(this.TTT, player));
 		}
 
 		return player;
@@ -52,15 +53,17 @@ var GameService = function() {
 	};
 
 	this.startGame = function() {
-		return this.TTT.startGame();
+		if (this.TTT.isReady()) {
+			this.TTT.startGame();
+		}
+	};
+
+	this.gameIsReady = function() {
+		return this.TTT.isReady();
 	};
 
 	this.makeOneMove = function() {
 		this.TTT.makeOneMove();
-	};
-
-	this.numberOfMarksOnBoardBy = function(player) {
-		return this.TTT.numberOfMarksOnBoardBy(player);
 	};
 
 	this.markAt = function(x, y) {
@@ -91,14 +94,7 @@ var GameService = function() {
 		this.TTT.setFirstPlayerToActivePlayer();
 	};
 
-	this.setPlayer = function(index, playerType) {
-		var mark;
-		if (index == 1) {
-			mark = "X";
-		} else {
-			mark = "O";
-		}
-		var player = this.createPlayer(playerType, mark);
-		this.TTT.setPlayer(index, player);
+	this.makeMoveAt = function(x, y) {
+		this.TTT.makeMoveForActivePlayer({x: x, y: y});
 	};
 };

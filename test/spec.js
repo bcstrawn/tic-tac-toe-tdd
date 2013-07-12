@@ -36,13 +36,13 @@ describe('GameService', function() {
 	});
 
 	it("can create 1 player and add it to the TTT", function() {
-		var player = gameService.createAndAddPlayer();
+		var player = gameService.setPlayer(1, "computer");
 		var players = gameService.getPlayers();
 		expect(players.indexOf(player)).not.toBe(-1);
 	});
 
 	it("has a first player after a player is added", function() {
-		gameService.createAndAddPlayer();
+		gameService.setPlayer(1, "computer");
 		expect(gameService.getFirstPlayer()).toBeDefined();
 	});
 
@@ -57,17 +57,16 @@ describe('GameService', function() {
 	});
 
 	it("only starts a game when there are 2 players and a board", function() {
-		gameService.createAndAddPlayer();
-		expect(gameService.startGame()).toBe(false);
-		gameService.createAndAddPlayer();
-		expect(gameService.startGame()).toBe(false);
+		gameService.setPlayer(1, "computer");
+		gameService.setPlayer(2, "computer");
+		expect(gameService.gameIsReady()).toBe(false);
 		/*gameService.createAndSetBoard();
-		expect(gameService.startGame()).toBe(true);*/
+		expect(gameService.gameIsReady()).toBe(true);*/
 	});
 
 	it("expects both players to have a unique mark", function() {
-		var player1 = gameService.createAndAddPlayer();
-		var player2 = gameService.createAndAddPlayer();
+		var player1 = gameService.setPlayer(1, "computer");
+		var player2 = gameService.setPlayer(2, "computer");
 
 		expect(player1.getMark()).toBeDefined();
 		expect(player2.getMark()).toBeDefined();
