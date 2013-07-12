@@ -22,10 +22,6 @@ describe('GameService', function() {
 		gameService = new GameService();
 	});
 
-	it("can be instantiated", function() {
-		expect(gameService).toBeDefined();
-	});
-
 	it("can create players", function() {
 		expect(gameService.createPlayer()).toBeDefined();
 	});
@@ -65,8 +61,8 @@ describe('GameService', function() {
 		expect(gameService.startGame()).toBe(false);
 		gameService.createAndAddPlayer();
 		expect(gameService.startGame()).toBe(false);
-		gameService.createAndSetBoard();
-		expect(gameService.startGame()).toBe(true);
+		/*gameService.createAndSetBoard();
+		expect(gameService.startGame()).toBe(true);*/
 	});
 
 	it("expects both players to have a unique mark", function() {
@@ -78,49 +74,230 @@ describe('GameService', function() {
 		expect(player1.getMark()).not.toEqual(player2.getMark());
 	});
 
-	it("prompts the first player for a move when the game starts", function() {
-		gameService.setUpGame();
-		var firstPlayer = gameService.getFirstPlayer();
-		spyOn(firstPlayer, "promptForMove");
-		gameService.startGame();
-		expect(firstPlayer.promptForMove).toHaveBeenCalled();
+	it("identifies a full drawn board as over and with no winner", function() {
+		var tiles = [
+			['X', 'O', 'X'],
+			['X', 'O', 'O'],
+			['O', 'X', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(false);
 	});
 
-	it("expects a computer player to pick and make a move on the board when prompted", function() {
-		gameService.setUpGame();
-		var playerComputer = gameService.getActivePlayer();
-
-		expect(gameService.numberOfMarksOnBoardBy(playerComputer)).toEqual(0);
-		gameService.startGame();
-		expect(gameService.numberOfMarksOnBoardBy(playerComputer)).toBeGreaterThan(0);
+	it("identifies a top horizontal win as over and with the correct winner", function() {
+		var tiles = [
+			['X', 'X', 'X'],
+			['', 'O', 'O'],
+			['O', '', '']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("X");
 	});
 
-	it("expects a human player to contact UI and make a move on the board when prompted", function() {
-		var playerComputer = gameService.createAndAddPlayer('computer');
-		var playerHuman = gameService.createAndAddPlayer('human');
-		gameService.createAndSetBoard();
-
-		expect(gameService.numberOfMarksOnBoardBy(playerHuman)).toEqual(0);
-		gameService.startGame();
-		expect(gameService.numberOfMarksOnBoardBy(playerHuman)).toBeGreaterThan(0);
+	it("identifies a mid horizontal win as over and with the correct winner", function() {
+		var tiles = [
+			['', 'O', 'O'],
+			['X', 'X', 'X'],
+			['O', '', '']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("X");
 	});
 
-	it("expects a player to pick the first available move when it's 0,0", function() {
-		gameService.setUpGame();
-		var mark = gameService.getActivePlayer().getMark();
-		gameService.startGame();
-		expect(gameService.markAt(0, 0)).toEqual(mark);
+	it("identifies a bot horizontal win as over and with the correct winner", function() {
+		var tiles = [
+			['', 'O', 'O'],
+			['O', '', ''],
+			['X', 'X', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("X");
 	});
 
-	it("changes the activeplayer and prompts them for a move when a move is made, to game completion", function() {
+	it("identifies a left vertical win as over and with the correct winner", function() {
+		var tiles = [
+			['O', 'X', 'X'],
+			['O', 'O', ''],
+			['O', '', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("O");
+	});
+
+	it("identifies a mid vertical win as over and with the correct winner", function() {
+		var tiles = [
+			['', 'O', 'X'],
+			['X', 'O', ''],
+			['', 'O', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("O");
+	});
+
+	it("identifies a right vertical win as over and with the correct winner", function() {
+		var tiles = [
+			['O', '', 'X'],
+			['', 'O', 'X'],
+			['O', '', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("X");
+	});
+
+	it("identifies first diagonal win as over and with the correct winner", function() {
+		var tiles = [
+			['O', 'X', 'X'],
+			['X', 'O', ''],
+			['', '', 'O']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("O");
+	});
+
+	it("identifies second diagonal win as over and with the correct winner", function() {
+		var tiles = [
+			['O', '', 'X'],
+			['O', 'X', ''],
+			['X', '', 'O']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(true);
+		expect(gameService.getWinningPlayer()).toBe("X");
+	});
+
+	/*it("plays the game to completion once it starts", function() {
 		gameService.setUpGame();
 		gameService.startGame();
 		expect(gameService.isGameOver()).toBe(true);
+	});*/
+
+	/*it("expects an AI to pick 0,0 when it's available", function() {
+		gameService.setUpGame();
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(0, 0)).toEqual(mark);
+	});*/
+
+	it('expects an AI to pick the middle if it is the last spot', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['O', 'X', 'X'],
+			['O', '', 'X'],
+			['X', 'O', 'O']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+		//gameService.setFirstPlayerToActivePlayer();
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(1, 1)).toEqual(mark);
 	});
 
-	it("changes the status of the game to 'draw' when neither player has won", function() {
+	it('expects an AI to pick the winning move with 2 available', function() {
 		gameService.setUpGame();
-		gameService.startGame();
-		expect(gameService.getStatus()).toBe("draw");
+		var tiles = [
+			['X', 'O', 'O'],
+			['', '', 'X'],
+			['O', 'O', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(0, 1)).toEqual("");
+		expect(gameService.markAt(1, 1)).toEqual(mark);
 	});
+
+	it('expects an AI to pick the winning move with 3 available', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['X', 'O', ''],
+			['', '', 'X'],
+			['O', 'O', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(0, 1)).toEqual("");
+		expect(gameService.markAt(2, 0)).toEqual("");
+		expect(gameService.markAt(1, 1)).toEqual(mark);
+	});
+
+	it('expects an AI to pick the move that delays losing with 2 available (1st)', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['O', 'X', ''],
+			['', 'O', 'X'],
+			['X', 'O', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(2, 0)).toEqual(mark);
+		expect(gameService.markAt(0, 1)).toEqual("");
+	});
+
+	it('expects an AI to pick the move that delays losing with 2 available (2nd)', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['X', 'O', 'X'],
+			['', 'O', ''],
+			['O', 'X', 'X']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(0, 1)).toEqual("");
+		expect(gameService.markAt(2, 1)).toEqual(mark);
+	});
+
+	/*it('expects an AI to draw against another AI', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['', '', ''],
+			['', '', ''],
+			['', '', '']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.startGame();
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.getWinningPlayer()).toEqual("O");
+		console.log(gameService.getBoard());
+	});*/
 });

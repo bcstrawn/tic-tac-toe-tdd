@@ -1,0 +1,53 @@
+/* app css stylesheet */
+
+table {
+	border-width: 1px;
+	border-style: solid;
+	margin: 10px auto;
+}
+
+td {
+	border: 1px solid black;
+	padding: 5px;
+	width: 50px;
+	height: 50px;
+}
+
+td:hover {
+	background-color: rgb(152, 152, 206);
+}
+
+td p {
+	text-align: center;
+	font-size: 20px;
+	margin: 0px;
+}
+
+#game {
+	width: 400px;
+	height: 350px;
+	border: 1px solid black;
+	margin: 10px auto;
+}
+
+#game button {
+	margin: 10px 0px 0px 160px;
+}
+
+#playerOptions {
+	margin: 20px 0px 20px 45px;
+}
+
+#playerOptions select {
+	float: left;
+	margin-right: 20px;
+}
+
+#playerOptions p {
+	float: left;
+	margin: 0px;
+}
+
+#status {
+	text-align: center;
+}

@@ -1,0 +1,38 @@
+<html ng-app="tic-tac-toe">
+<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<script type="text/javascript" src="../gameService.js"></script>
+	<script type="text/javascript" src="../ttt.js"></script>
+	<script type="text/javascript" src="../board.js"></script>
+	<script type="text/javascript" src="../player.js"></script>
+	<script type="text/javascript" src="../game.js"></script>
+	<script type="text/javascript" src="angular.js"></script>
+	<script type="text/javascript" src="app.js"></script>
+</head>
+<body ng-controller="gameCtrl">
+	<div id="game">
+		<table>
+			<tr data-ng-repeat="row in board">
+				<td data-ng-repeat="square in row" data-ng-click="selectSquare(square)">
+					<p>{{square.mark}}</p>
+				</td>
+			</tr>
+		</table>
+
+		<div id="playerOptions">
+			<p>Player 1:</p>
+			<select ng-disabled="disableEditing" ng-model="player1.option" ng-options="opt for opt in playerOptions"></select>
+			
+			<p>Player 2:</p>
+			<select ng-disabled="disableEditing" ng-model="player2.option" ng-options="opt for opt in playerOptions"></select>
+		</div>
+
+		<br>
+		
+		<button data-ng-click="buttonClick()">{{button}}</button>
+		
+		<p id="status">{{status}}</p>
+	</div>
+</body>
+</html>
