@@ -7,7 +7,8 @@ It needs to be able to return the players.
 It doesn't need to keep track of which player is human vs ai.
 It needs to have an active player.
 It needs to tell the right player when it expects a move.
-Its players should have the info required to make a move.Its human players should tell the UI when they expect a move.
+Its players should have the info required to make a move.Its human players should tell 
+	the UI when they expect a move.
 Its human players should accept a move from the UI (when it's expecting one) and send it to the Game.
 Its ai players should be able to accept any ai.
 It needs to have a default ai for non-human players to use to make moves.
@@ -237,9 +238,9 @@ describe('GameService', function() {
 	it('expects an AI to pick the winning move with 3 available', function() {
 		gameService.setUpGame();
 		var tiles = [
-			['X', 'O', ''],
-			['', '', 'X'],
-			['O', 'O', 'X']
+			['O', 'X', ''],
+			['', '', 'O'],
+			['X', 'X', 'O']
 		];
 		var board = new Board(tiles);
 		gameService.setBoard(board);
@@ -249,6 +250,24 @@ describe('GameService', function() {
 		expect(gameService.markAt(0, 1)).toEqual("");
 		expect(gameService.markAt(2, 0)).toEqual("");
 		expect(gameService.markAt(1, 1)).toEqual(mark);
+	});
+
+	it('expects an AI to pick the winning move with 4 available', function() {
+		gameService.setUpGame();
+		var tiles = [
+			['O', 'X', ''],
+			['', 'X', 'O'],
+			['', '', 'O']
+		];
+		var board = new Board(tiles);
+		gameService.setBoard(board);
+
+		var mark = gameService.getFirstPlayer().getMark();
+		gameService.makeOneMove();
+		expect(gameService.markAt(0, 1)).toEqual("");
+		expect(gameService.markAt(2, 0)).toEqual("");
+		expect(gameService.markAt(0, 2)).toEqual("");
+		expect(gameService.markAt(1, 2)).toEqual(mark);
 	});
 
 	it('expects an AI to pick the move that delays losing with 2 available (1st)', function() {
@@ -282,21 +301,4 @@ describe('GameService', function() {
 		expect(gameService.markAt(0, 1)).toEqual("");
 		expect(gameService.markAt(2, 1)).toEqual(mark);
 	});
-
-	/*it('expects an AI to draw against another AI', function() {
-		gameService.setUpGame();
-		var tiles = [
-			['', '', ''],
-			['', '', ''],
-			['', '', '']
-		];
-		var board = new Board(tiles);
-		gameService.setBoard(board);
-
-		var mark = gameService.getFirstPlayer().getMark();
-		gameService.startGame();
-		expect(gameService.isGameOver()).toBe(true);
-		expect(gameService.getWinningPlayer()).toEqual("O");
-		console.log(gameService.getBoard());
-	});*/
 });

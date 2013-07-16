@@ -37,6 +37,6 @@ var AI = function(game, player) {
 			}
 		}
 
-		return (depth > 1) ? bestScore : bestMove;
+		return (depth > 1) ? bestScore * 0.9 : bestMove;
 	};
 };

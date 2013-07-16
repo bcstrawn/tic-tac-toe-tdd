@@ -15,27 +15,16 @@ var Board = function(tiles) {
 		this.tiles[y][x] = mark;
 	};
 
-	/*this.addWatcher = function(watcher) {
-		this.watchers.push(watcher);
+	this.getTiles = function() {
+		return this.tiles;
 	};
 
-	this.notifyWatchers = function() {
-		for (var i = 0; i < this.watchers.length; i++) {
-			this.watchers[i].updateBoard(this.tiles);
-		}
-	};*/
-
-	this.getTiles = function() {
-		/*var tiles = [];
+	this.clear = function() {
 		for (var y = 0; y < this.tiles.length; y++) {
-			tiles[y] = [];
 			for (var x = 0; x < this.tiles[y].length; x++) {
-				var mark = this.markAt(x, y);
-				tiles[y][x] = {mark: mark};
+				this.tiles[y][x] = "";
 			}
 		}
-		return tiles;*/
-		return this.tiles;
 	};
 
 	this.copyBoard = function() {

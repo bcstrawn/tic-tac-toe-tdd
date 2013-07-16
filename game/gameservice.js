@@ -97,4 +97,18 @@ var GameService = function() {
 	this.makeMoveAt = function(x, y) {
 		this.TTT.makeMoveForActivePlayer({x: x, y: y});
 	};
+
+	this.makeMoveForActivePlayer = function(moveCoords) {
+		if (this.TTT.gameIsStarted()) {
+			this.TTT.makeMoveForActivePlayer(moveCoords);
+		}
+	};
+
+	this.getStatus = function() {
+		return this.TTT.getStatus();
+	};
+
+	this.quitGame = function() {
+		this.TTT.quitGame();
+	};
 };

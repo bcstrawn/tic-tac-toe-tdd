@@ -6,7 +6,8 @@ var TTT = function() {
 	this.winningPlayer = undefined;
 	this.availableMarks = ["X", "O"];
 	this.playerMarks = ["X", "O"];
-	this.status = "";
+	this.currentStatus = "Start a Game!";
+	this.expectingMove = false;
 	this.winningPatterns = [
 		[{x: 0, y: 2}, {x: 0, y: 1}, {x: 0, y: 0}], // Left.
 		[{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}], // Top.
@@ -19,12 +20,17 @@ var TTT = function() {
 	];
 
 	/* statuses
+		The game has ended in a draw.
+		It's player X's turn.
+		It's player O's turn.
+		Player 'O' has won!
+		Player 'X' has won!
+	*/
 
-	The game has ended in a draw.
-	It's player X's turn.
-	It's player O's turn.
-	Player 'O' has won!
-	Player 'X' has won!
+	/* actions
+		Start Game
+		Quit Game
+		Restart Game
 	*/
 
 	this.copyGame = function() {
@@ -36,11 +42,6 @@ var TTT = function() {
 		return game;
 	};
 
-	this.addPlayer = function(player) {
-		this.players.push(player);
-		this.playerThatGoesFirst = player;
-	};
-
 	this.setPlayers = function(players) {
 		this.players = players;
 		this.playerThatGoesFirst = players[1];
@@ -48,8 +49,7 @@ var TTT = function() {
 
 	this.setPlayer = function(index, player) {
 		this.players[index - 1] = player;
-		this.playerThatGoesFirst = player;
-		this.activePlayer = player;
+		this.playerThatGoesFirst = this.players[0];
 	};
 
 	this.getPlayers = function() {
@@ -81,16 +81,29 @@ var TTT = function() {
 	};
 
 	this.startGame = function() {
+		this.clearBoard();
 		this.activePlayer = this.playerThatGoesFirst;
 		this.promptActivePlayerForMove();
 	};
 
 	this.makeMoveForActivePlayer = function(moveCoords) {
+		if (!this.expectingMove) {
+			return;
+		}
+
 		this.board.setMarkAt(this.activePlayer.getMark(), moveCoords.x, moveCoords.y);
+		this.expectingMove = false;
 
 		if (!this.isGameOver()) {
 			this.switchActivePlayer();
 			this.promptActivePlayerForMove();
+		} else {
+			var winnerMark = this.getWinningPlayer();
+			if (winnerMark) {
+				this.currentStatus = "Player '" + winnerMark + "' has won!";
+			} else {
+				this.currentStatus = "The game has ended in a draw.";
+			}
 		}
 	};
 
@@ -106,6 +119,9 @@ var TTT = function() {
 	};
 
 	this.promptActivePlayerForMove = function() {
+		this.expectingMove = true;
+		var mark = this.activePlayer.getMark();
+		this.currentStatus = "It's player " + mark + "'s turn";
 		this.activePlayer.promptForMove();
 	};
 
@@ -182,5 +198,21 @@ var TTT = function() {
 		} else {
 			return 0;
 		}
+	};
+
+	this.gameIsStarted = function() {
+		return (this.activePlayer !== undefined);
+	};
+
+	this.getStatus = function() {
+		return this.currentStatus;
+	};
+
+	this.quitGame = function() {
+		this.expectingMove = false;
+	};
+
+	this.clearBoard = function() {
+		this.board.clear();
 	};
 };
