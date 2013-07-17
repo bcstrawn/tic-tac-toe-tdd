@@ -1,5 +1,6 @@
 var GameService = function() {
-	this.TTT = new TTT();
+	this.game = new Game();
+	this.game.setRules(new TTTRules());
 
 	this.setUpGame = function() {
 		this.setPlayer(1, 'computer');
@@ -8,20 +9,20 @@ var GameService = function() {
 	};
 
 	this.setPlayer = function(index, playerType) {
-		var mark = this.TTT.getMarkOfPlayer(index);
+		var mark = this.game.getMarkOfPlayer(index);
 		var player = this.createPlayer(playerType, mark);
 
-		this.TTT.setPlayer(index, player);
+		this.game.setPlayer(index, player);
 		return player;
 	};
 
 	this.createPlayer = function(playerType, mark) {
-		var player = new Player(playerType, mark, this.TTT);
+		var player = new Player(playerType, mark, this.game);
 
 		if (playerType == "human") {
-			player.setMoveProvider(new UI(this.TTT));
+			player.setMoveProvider(new UI(this.game));
 		} else if (playerType == "computer") {
-			player.setMoveProvider(new AI(this.TTT, player));
+			player.setMoveProvider(new AI(this.game, player));
 		}
 
 		return player;
@@ -29,86 +30,93 @@ var GameService = function() {
 
 	this.createAndSetBoard = function() {
 		var board = new Board();
-		this.TTT.setBoard(board);
+		this.game.setBoard(board);
 	};
 
 	this.getPlayers = function() {
-		return this.TTT.getPlayers();
+		return this.game.getPlayers();
 	};
 
 	this.getActivePlayer = function() {
-		return this.TTT.activePlayer;
+		return this.game.activePlayer;
 	};
 
 	this.getFirstPlayer = function() {
-		return this.TTT.getFirstPlayer();
+		return this.game.getFirstPlayer();
 	};
 
 	this.getBoard = function() {
-		return this.TTT.board;
+		return this.game.board;
 	};
 
 	this.getBoardTiles = function() {
-		return this.TTT.board.getTiles();
+		return this.game.board.getTiles();
 	};
 
 	this.startGame = function() {
-		if (this.TTT.isReady()) {
-			this.TTT.startGame();
+		if (this.game.isReady()) {
+			this.game.startGame();
 		}
 	};
 
 	this.gameIsReady = function() {
-		return this.TTT.isReady();
+		return this.game.isReady();
 	};
 
 	this.makeOneMove = function() {
-		this.TTT.makeOneMove();
+		this.game.makeOneMove();
 	};
 
 	this.markAt = function(x, y) {
-		return this.TTT.markAt(x, y);
+		return this.game.markAt(x, y);
 	};
 
 	this.isGameOver = function() {
-		return this.TTT.isGameOver();
+		return this.game.isGameOver();
 	};
 
 	this.setBoard = function(board) {
-		this.TTT.setBoard(board);
+		this.game.setBoard(board);
 	};
 
 	this.evaluateBoard = function() {
-		return this.TTT.evaluateBoard();
+		return this.game.evaluateBoard();
 	};
 
 	this.boardHasWinningPlayer = function() {
-		return this.TTT.boardHasWinningPlayer();
+		return this.game.boardHasWinningPlayer();
 	};
 
 	this.getWinningPlayer = function() {
-		return this.TTT.getWinningPlayer();
+		return this.game.getWinningPlayer();
 	};
 
 	this.setFirstPlayerToActivePlayer = function() {
-		this.TTT.setFirstPlayerToActivePlayer();
+		this.game.setFirstPlayerToActivePlayer();
 	};
 
 	this.makeMoveAt = function(x, y) {
-		this.TTT.makeMoveForActivePlayer({x: x, y: y});
+		this.game.makeMoveForActivePlayer({x: x, y: y});
 	};
 
 	this.makeMoveForActivePlayer = function(moveCoords) {
-		if (this.TTT.gameIsStarted()) {
-			this.TTT.makeMoveForActivePlayer(moveCoords);
+		if (this.game.gameIsStarted()) {
+			this.game.makeMoveForActivePlayer(moveCoords);
 		}
 	};
 
 	this.getStatus = function() {
-		return this.TTT.getStatus();
+		return this.game.getStatus();
 	};
 
 	this.quitGame = function() {
-		this.TTT.quitGame();
+		this.game.quitGame();
 	};
 };
+
+
+/*var forEach = function(array, action) {
+	for (var i = 0; i < array.length; i++) {
+		action(array[i]);
+	}
+};*/

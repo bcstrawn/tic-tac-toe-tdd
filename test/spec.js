@@ -14,6 +14,27 @@ Its ai players should be able to accept any ai.
 It needs to have a default ai for non-human players to use to make moves.
 Its ai players should use their ai to generate a move and send it to the Game.
 
+* if statements
+* extract ui components
+* function to loop
+* keep same board - undo
+* depth/alpha beta pruning
+* separate TTT into rules and management
+	ideal: game could take different set of rules and not change
+* "runner" sends a ui function to player to call
+
+*/
+/* actions
+	Start Game
+	Quit Game
+	Play Again
+*/
+/* statuses
+	The game has ended in a draw.
+	It's player X's turn.
+	It's player O's turn.
+	Player 'O' has won!
+	Player 'X' has won!
 */
 
 describe('GameService', function() {
@@ -61,8 +82,8 @@ describe('GameService', function() {
 		gameService.setPlayer(1, "computer");
 		gameService.setPlayer(2, "computer");
 		expect(gameService.gameIsReady()).toBe(false);
-		/*gameService.createAndSetBoard();
-		expect(gameService.gameIsReady()).toBe(true);*/
+		gameService.createAndSetBoard();
+		expect(gameService.gameIsReady()).toBe(true);
 	});
 
 	it("expects both players to have a unique mark", function() {
@@ -190,19 +211,6 @@ describe('GameService', function() {
 		expect(gameService.getWinningPlayer()).toBe("X");
 	});
 
-	/*it("plays the game to completion once it starts", function() {
-		gameService.setUpGame();
-		gameService.startGame();
-		expect(gameService.isGameOver()).toBe(true);
-	});*/
-
-	/*it("expects an AI to pick 0,0 when it's available", function() {
-		gameService.setUpGame();
-		var mark = gameService.getFirstPlayer().getMark();
-		gameService.makeOneMove();
-		expect(gameService.markAt(0, 0)).toEqual(mark);
-	});*/
-
 	it('expects an AI to pick the middle if it is the last spot', function() {
 		gameService.setUpGame();
 		var tiles = [
@@ -212,7 +220,6 @@ describe('GameService', function() {
 		];
 		var board = new Board(tiles);
 		gameService.setBoard(board);
-		//gameService.setFirstPlayerToActivePlayer();
 
 		var mark = gameService.getFirstPlayer().getMark();
 		gameService.makeOneMove();
@@ -300,5 +307,12 @@ describe('GameService', function() {
 		gameService.makeOneMove();
 		expect(gameService.markAt(0, 1)).toEqual("");
 		expect(gameService.markAt(2, 1)).toEqual(mark);
+	});
+
+	it("expects 2 computers to draw against each other", function() {
+		gameService.setUpGame();
+		gameService.startGame();
+		expect(gameService.isGameOver()).toBe(true);
+		expect(gameService.boardHasWinningPlayer()).toBe(false);
 	});
 });

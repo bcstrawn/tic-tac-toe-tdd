@@ -11,13 +11,13 @@ angular.module("tic-tac-toe", [])
 		];
 		$scope.currentButtonStatus = $scope.buttonStatuses[0];
 		$scope.disableEditing = false;
-		$scope.tiles = $scope.game.TTT.board.getTiles();
+		$scope.tiles = $scope.game.getBoardTiles();
 
 		$scope.playerOptions = ['human', 'computer'];
 		$scope.player1 = {option: "human"};
 		$scope.player2 = {option: "computer"};
 
-		$scope.status = $scope.game.getStatus();
+		$scope.status = "Start a Game!";
 	};
 
 	$scope.buttonClick = function() {
@@ -44,8 +44,21 @@ angular.module("tic-tac-toe", [])
 	};
 
 	$scope.updateStatus = function() {
-		$scope.status = $scope.game.getStatus();
+		$scope.status = "placeholder";
+
+		if ($scope.game.isGameOver()) {
+			var winnerMark = $scope.game.getWinningPlayer();
+			if (winnerMark) {
+				$scope.status = "Player '" + winnerMark + "' has won!";
+			} else {
+				$scope.status = "The game has ended in a draw.";
+			}
+		} else {
+			var mark = $scope.game.getActivePlayer().getMark();
+			$scope.status = "It's player " + mark + "'s turn";
+		}
 	};
+
 
 	$scope.updateEditing = function() {
 		this.disableEditing = !$scope.game.isGameOver();

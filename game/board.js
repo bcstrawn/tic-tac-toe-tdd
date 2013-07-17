@@ -1,5 +1,4 @@
 var Board = function(tiles) {
-	//this.watchers = [];
 	this.tiles = tiles ? tiles :
 	[
 		['', '', ''],
@@ -22,12 +21,12 @@ var Board = function(tiles) {
 	this.clear = function() {
 		for (var y = 0; y < this.tiles.length; y++) {
 			for (var x = 0; x < this.tiles[y].length; x++) {
-				this.tiles[y][x] = "";
+				this.setMarkAt("", x, y);
 			}
 		}
 	};
 
-	this.copyBoard = function() {
+	/*this.copyBoard = function() {
 		var tiles = [];
 		for (var y = 0; y < this.tiles.length; y++) {
 			tiles[y] = [];
@@ -36,7 +35,7 @@ var Board = function(tiles) {
 			}
 		}
 		return new Board(tiles);
-	};
+	};*/
 
 	this.getAvailableMoves = function() {
 		var moves = [];

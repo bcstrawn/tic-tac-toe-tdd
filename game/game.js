@@ -1,45 +1,26 @@
-var TTT = function() {
+var Game = function() {
 	this.players = [];
 	this.playerThatGoesFirst = undefined;
 	this.activePlayer = undefined;
 	this.board = undefined;
-	this.winningPlayer = undefined;
+	this.running = false;
 	this.availableMarks = ["X", "O"];
 	this.playerMarks = ["X", "O"];
-	this.currentStatus = "Start a Game!";
 	this.expectingMove = false;
-	this.winningPatterns = [
-		[{x: 0, y: 2}, {x: 0, y: 1}, {x: 0, y: 0}], // Left.
-		[{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}], // Top.
-		[{x: 2, y: 0}, {x: 2, y: 1}, {x: 2, y: 2}], // Right.
-		[{x: 2, y: 2}, {x: 1, y: 2}, {x: 0, y: 2}], // Bottom.
-		[{x: 0, y: 1}, {x: 1, y: 1}, {x: 2, y: 1}], // Horizontal middle.
-		[{x: 1, y: 0}, {x: 1, y: 1}, {x: 1, y: 2}], // Vertical middle.
-		[{x: 0, y: 0}, {x: 1, y: 1}, {x: 2, y: 2}], // Top-left to bottom-right.
-		[{x: 0, y: 2}, {x: 1, y: 1}, {x: 2, y: 0}]  // Bottom-left to top-right.
-	];
-
-	/* statuses
-		The game has ended in a draw.
-		It's player X's turn.
-		It's player O's turn.
-		Player 'O' has won!
-		Player 'X' has won!
-	*/
-
-	/* actions
-		Start Game
-		Quit Game
-		Restart Game
-	*/
 
 	this.copyGame = function() {
-		var game = new TTT();
+		var game = new Game();
+		game.setRules(new TTTRules());
 		game.setPlayers(this.players);
 		game.activePlayer = this.activePlayer;
 		game.setBoard(this.board.copyBoard());
 
 		return game;
+	};
+
+	this.setRules = function(rules) {
+		this.rules = rules;
+		this.rules.setPlayerMarks(this.playerMarks);
 	};
 
 	this.setPlayers = function(players) {
@@ -70,6 +51,7 @@ var TTT = function() {
 
 	this.setBoard = function(board) {
 		this.board = board;
+		this.rules.setBoard(board);
 	};
 
 	this.getBoard = function() {
@@ -83,6 +65,7 @@ var TTT = function() {
 	this.startGame = function() {
 		this.clearBoard();
 		this.activePlayer = this.playerThatGoesFirst;
+		this.running = true;
 		this.promptActivePlayerForMove();
 	};
 
@@ -97,21 +80,12 @@ var TTT = function() {
 		if (!this.isGameOver()) {
 			this.switchActivePlayer();
 			this.promptActivePlayerForMove();
-		} else {
-			var winnerMark = this.getWinningPlayer();
-			if (winnerMark) {
-				this.currentStatus = "Player '" + winnerMark + "' has won!";
-			} else {
-				this.currentStatus = "The game has ended in a draw.";
-			}
 		}
 	};
 
-	this.isGameOver = function() {
-		if (this.boardHasWinningPlayer() || this.boardIsFull())
-			return true;
-		else
-			return false;
+	this.undoMove = function(move) {
+		this.board.setMarkAt("", move.x, move.y);
+		this.switchActivePlayer();
 	};
 
 	this.switchActivePlayer = function() {
@@ -120,8 +94,6 @@ var TTT = function() {
 
 	this.promptActivePlayerForMove = function() {
 		this.expectingMove = true;
-		var mark = this.activePlayer.getMark();
-		this.currentStatus = "It's player " + mark + "'s turn";
 		this.activePlayer.promptForMove();
 	};
 
@@ -130,17 +102,20 @@ var TTT = function() {
 	};
 
 	this.makeOneMove = function(move) {
-		if (this.players.length == 2 && this.board) {
-			if (!this.activePlayer) {
-				this.activePlayer = this.playerThatGoesFirst;
-			}
-			if (!move) {
-				var move = this.activePlayer.moveProvider.getBestMove(this, 1);
-			}
-			
-			this.board.setMarkAt(this.activePlayer.getMark(), move.x, move.y);
-			this.switchActivePlayer();
+		if (this.players.length !== 2 || !this.board) {
+			return;
 		}
+		this.running = true;
+
+		if (!this.activePlayer) {
+			this.activePlayer = this.playerThatGoesFirst;
+		}
+		if (!move) {
+			var move = this.activePlayer.moveProvider.getBestMove(this, 1, -10, 10);
+		}
+		
+		this.board.setMarkAt(this.activePlayer.getMark(), move.x, move.y);
+		this.switchActivePlayer();
 	};
 
 	this.getAvailableMoves = function() {
@@ -159,60 +134,36 @@ var TTT = function() {
 		return true;
 	};
 
-	this.boardHasWinningPlayer = function() {
-		for (var i = 0; i < this.winningPatterns.length; i++) {
-			var pattern = this.winningPatterns[i];
-			var winner = this.board.matchPattern(pattern, this.playerMarks);
-			if (winner)
-				return true;
-		}
-
-		return false;
-	};
-
-	this.getWinningPlayer = function() {
-		for (var i = 0; i < this.winningPatterns.length; i++) {
-			var pattern = this.winningPatterns[i];
-			var winner = this.board.matchPattern(pattern, this.playerMarks);
-			if (winner)
-				return winner;
-		}
-
-		return undefined;
-	};
-
 	this.setFirstPlayerToActivePlayer = function() {
 		this.activePlayer = this.playerThatGoesFirst;
-	};
-
-	this.calculateScore = function() {
-		var hasWinningPlayer = this.boardHasWinningPlayer();
-		if (hasWinningPlayer) {
-			var winner = this.getWinningPlayer();
-
-			if (winner == this.activePlayer.getMark()) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} else {
-			return 0;
-		}
 	};
 
 	this.gameIsStarted = function() {
 		return (this.activePlayer !== undefined);
 	};
 
-	this.getStatus = function() {
-		return this.currentStatus;
-	};
-
 	this.quitGame = function() {
 		this.expectingMove = false;
+		this.running = false;
 	};
 
 	this.clearBoard = function() {
 		this.board.clear();
+	};
+
+	this.isGameOver = function() {
+		return (this.boardHasWinningPlayer() || this.boardIsFull() || !this.running);
+	};
+
+	this.boardHasWinningPlayer = function() {
+		return this.rules.boardHasWinningPlayer();
+	};
+
+	this.getWinningPlayer = function() {
+		return this.rules.getWinningPlayer();
+	};
+
+	this.calculateScore = function() {
+		return this.rules.calculateScore(this.activePlayer);
 	};
 };
