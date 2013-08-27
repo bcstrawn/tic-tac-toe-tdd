@@ -1,4 +1,4 @@
 tic-tac-toe-tdd
 ===============
 
-A tic-tac-toe game written as a POJO using TDD.
+Tic-tac-toe written as a POJO using TDD, with an angular front-end. The game is interacted with through the gameservice.
